@@ -9,16 +9,19 @@ class Table {
     private tableName: string
     // 拼接时用的空格分割字符
     private blankSpace: string
+
     constructor() {
         this.fields = this.sqlString = this.tableName = this.condition = ''
         this.blankSpace = ' '
     }
+
     // 设置表名
     public table(tableName: string): Table {
         this.tableName = '`' + tableName + '`'
         return this
     }
-    // where AND 
+
+    // where AND
     public where(condition: string): Table
     public where(condition: object): Table
     public where(condition: any): Table {
@@ -43,7 +46,7 @@ class Table {
                         concatenation.push('`' + unit + '`' + this.blankSpace + expression)
                     } catch (err) {
                         console.error(err.message)
-                    }                 
+                    }
                 }
             }
             this.condition += concatenation.join(' AND ')
@@ -51,14 +54,17 @@ class Table {
         this.condition += alreadySet ? ')' : ''
         return this
     }
+
     public and(): Table {
         this.condition = '(' + this.condition + ')' + this.blankSpace + ' AND '
         return this
     }
+
     public or(): Table {
         this.condition = '(' + this.condition + ')' + this.blankSpace + ' OR '
         return this
     }
+
     // 生成select语句
     public select(field?: string | string[]): string {
         try {
@@ -82,6 +88,7 @@ class Table {
             console.error(err.message)
         }
     }
+
     // sql元验证
     private sqlUnitVerifier(): void {
         if (this.tableName === '') {
@@ -89,6 +96,7 @@ class Table {
         }
         if (this.condition === '') this.condition = 'true'
     }
+
     // 生成条件表达式
     private generateConditionExpression(value: string, type: string): string {
         if (typeof value !== 'string') {
@@ -129,35 +137,15 @@ class Table {
                 expression = '=' + this.blankSpace + '\'' + value + '\''
         }
         return expression
-
-
     }
+
     // 清空记录
     private reset(): void {
         this.fields = this.sqlString = this.tableName = this.condition = ''
     }
 }
-//// 重载
-//function whereBuilder(condition: string): Table
-//function whereBuilder(condition: whereObjectUnit[]): Table
-//function whereBuilder(this: any, condition: any): Table {
-
-//}
-
-//class whereObjectUnit {
-//    private split: string
-//    constructor(private key: string, private value: string | number, private type = '=') {
-//        this.split = ' '
-//    }
-//    public getSqlCondition(): string {
-//        let stringSplit = '\''
-//        if (typeof this.value === 'string') this.value = stringSplit + this.value + stringSplit
-//        return '`' + this.key + '`' + this.split + this.type.toUpperCase() + this.split + this.value
-//    }
-//}
-
 
 let test = new Table()
 test.table('123').where({
-    a: 3, b: '2', c: ['3','not in'],d:['3,6,9','in'],e:['ac','like']
+    a: 3, b: '2', c: ['3', 'not in'], d: ['3,6,9', 'in'], e: ['ac', 'like']
 }).select()
