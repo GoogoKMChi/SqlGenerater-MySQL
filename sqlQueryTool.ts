@@ -113,6 +113,7 @@ class Table {
             case '!=':
             case 'BETWEEN':
                 expression = type + this.blankSpace + '\'' + value + '\''
+                break
             case 'LIKE':
                 expression = type + this.blankSpace + '\'%' + value + '%\''
                 break
