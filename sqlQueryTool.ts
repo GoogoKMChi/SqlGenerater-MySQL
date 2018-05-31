@@ -117,10 +117,10 @@ class Table {
                 expression = type + this.blankSpace + '\'%' + value + '%\''
                 break
             case 'RLIKE':
-                expression = type + this.blankSpace + '\'' + value + '%\''
+                expression = 'LIKE' + this.blankSpace + '\'' + value + '%\''
                 break
             case 'LLIKE':
-                expression = type + this.blankSpace + '%\'' + value + '\''
+                expression = 'LIKE' + this.blankSpace + '%\'' + value + '\''
                 break
             case 'NOT LIKE':
             case 'NOTLIKE':

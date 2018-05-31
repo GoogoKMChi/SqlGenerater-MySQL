@@ -20,7 +20,7 @@ table.table('tableName').where({
 SELECT 'name','age','account' 
 FROM `tableName` 
 WHERE (
-    (`field` = 'value' AND `field2` = '2' AND `field3` NOT IN ('1','2','3') AND `field4` LIKE '%something%' AND `field5` RLIKE 'others%'AND `field6` != '%5%')  
+    (`field` = 'value' AND `field2` = '2' AND `field3` NOT IN ('1','2','3') AND `field4` LIKE '%something%' AND `field5` LIKE 'others%'AND `field6` != '%5%')  
     AND 
     (`field7` = '123')
  )
