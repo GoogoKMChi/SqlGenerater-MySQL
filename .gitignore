@@ -6,5 +6,5 @@
 *.ntvs*
 *.njsproj
 *.sln
-*.js
+#*.js
 *.map
