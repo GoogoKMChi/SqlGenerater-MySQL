@@ -113,25 +113,58 @@ var Table = /** @class */ (function () {
      */
     Table.prototype.insert = function (data, full) {
         if (full === void 0) { full = false; }
-        try {
-            //验证下必要信息
-            this.sqlUnitVerifier();
-            var key = [];
-            var value = [];
-            var noValue = [];
-            for (var i in data) {
-                key.push('`' + i + '`');
-                value.push('\'' + data[i] + '\'');
-                noValue.push('?');
+        if (data) {
+            try {
+                //验证下必要信息
+                this.sqlUnitVerifier();
+                var key = [];
+                var value = [];
+                var noValue = [];
+                for (var i in data) {
+                    key.push('`' + i + '`');
+                    value.push(full ? ('\'' + data[i] + '\'') : '?');
+                }
+                var sqlArr = ['INSERT INTO', this.tableName, '(' + key.join(',') + ')', 'VALUES', '(' + value.join(',') + ')'];
+                this.reset();
+                return sqlArr.join(this.blankSpace);
             }
-            var values = full ? value : noValue;
-            var sqlArr = ['INSERT INTO', this.tableName, '(' + key.join(',') + ')', 'VALUES', '(' + values.join(',') + ')'];
-            this.reset();
-            return sqlArr.join(this.blankSpace);
+            catch (err) {
+                this.reset();
+                console.error(err.message);
+            }
         }
-        catch (err) {
+        else {
             this.reset();
-            console.error(err.message);
+            console.error('insert expect at least one parameter');
+        }
+    };
+    /**
+     * 生成update语句
+     * @param data
+     * @param full 可选，默认false，生成`key`=?的形式
+     */
+    Table.prototype.update = function (data, full) {
+        if (full === void 0) { full = false; }
+        if (data) {
+            try {
+                //验证下必要信息
+                this.sqlUnitVerifier();
+                var setValue = [];
+                for (var i in data) {
+                    setValue.push('`' + i + '`=' + (full ? '\'' + data[i] + '\'' : '?'));
+                }
+                var sqlArr = ['UPDATE', this.tableName, 'SET', setValue.join(','), 'WHERE', this.condition];
+                this.reset();
+                return sqlArr.join(this.blankSpace);
+            }
+            catch (err) {
+                this.reset();
+                console.error(err.message);
+            }
+        }
+        else {
+            this.reset();
+            console.error('update expect at least one parameter');
         }
     };
     /**
@@ -223,4 +256,10 @@ test.table('user').insert({
     age: '81',
     account: 'ihcmkogoog'
 }, true);
+test.table('updated').where({
+    number: ['1,4', 'between']
+}).update({
+    name: 'whatever',
+    sex: 'who knows'
+});
 //# sourceMappingURL=sqlQueryTool.js.map

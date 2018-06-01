@@ -48,3 +48,18 @@ test.table('user').insert({
 会生成
 INSERT INTO `user` (`name`,`age`,`account`) VALUES ('kmc','18','googokmchi')
 </code></pre>
+
+## update用法
+<pre><code>
+test.table('updated').where({
+    number: ['1,4', 'between']
+}).update({
+    name: 'whatever',
+    sex: 'who knows'
+})
+
+会生成
+UPDATE `updated` 
+SET `name`=?,`sex`=? 
+WHERE `number` BETWEEN '1' AND '4'
+</code></pre>

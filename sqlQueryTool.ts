@@ -141,24 +141,54 @@ class Table {
      * @param full 可选，默认false，生成values(?,?,?)的形式
      */
     public insert(data: object, full = false): string {
-        try {
-            //验证下必要信息
-            this.sqlUnitVerifier()
-            let key = []
-            let value = []
-            let noValue = []
-            for (let i in data) {
-                key.push('`' + i + '`')
-                value.push('\'' + data[i] + '\'')
-                noValue.push('?')
+        if (data) {
+            try {
+                //验证下必要信息
+                this.sqlUnitVerifier()
+                let key = []
+                let value = []
+                let noValue = []
+                for (let i in data) {
+                    key.push('`' + i + '`')
+                    value.push(full ? ('\'' + data[i] + '\'') : '?')
+                }
+                let sqlArr = ['INSERT INTO', this.tableName, '(' + key.join(',') + ')', 'VALUES', '(' + value.join(',') + ')']
+                this.reset()
+                return sqlArr.join(this.blankSpace)
+            } catch (err) {
+                this.reset()
+                console.error(err.message)
             }
-            let values = full ? value : noValue
-            let sqlArr = ['INSERT INTO', this.tableName, '(' + key.join(',') + ')', 'VALUES', '(' + values.join(',') + ')']
+        } else {
             this.reset()
-            return sqlArr.join(this.blankSpace)
-        } catch (err) {
+            console.error('insert expect at least one parameter')
+        }
+    }
+
+    /**
+     * 生成update语句
+     * @param data
+     * @param full 可选，默认false，生成`key`=?的形式
+     */
+    public update(data: object, full = false): string {
+        if (data) {
+            try {
+                //验证下必要信息
+                this.sqlUnitVerifier()
+                let setValue = []
+                for (let i in data) {
+                    setValue.push('`' + i + '`=' + (full ? '\'' + data[i] + '\'' : '?'))
+                }
+                let sqlArr = ['UPDATE', this.tableName, 'SET', setValue.join(','), 'WHERE', this.condition]
+                this.reset()
+                return sqlArr.join(this.blankSpace)
+            } catch (err) {
+                this.reset()
+                console.error(err.message)
+            }
+        } else {
             this.reset()
-            console.error(err.message)
+            console.error('update expect at least one parameter')
         }
     }
 
@@ -244,10 +274,16 @@ test.table('123').where({
 test.table('user').insert({
     name: 'kmc',
     age: '18',
-    account:'googokmchi'
+    account: 'googokmchi'
 })
 test.table('user').insert({
     name: 'cmk',
     age: '81',
     account: 'ihcmkogoog'
 }, true)
+test.table('updated').where({
+    number: ['1,4', 'between']
+}).update({
+    name: 'whatever',
+    sex: 'who knows'
+})
