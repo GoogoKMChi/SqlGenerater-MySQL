@@ -168,6 +168,22 @@ var Table = /** @class */ (function () {
         }
     };
     /**
+     * 生成删除语句
+     */
+    Table.prototype.delete = function () {
+        try {
+            //验证下必要信息
+            this.sqlUnitVerifier();
+            var sqlArr = ['DELETE FROM', this.tableName, 'WHERE', this.condition];
+            this.reset();
+            return sqlArr.join(this.blankSpace);
+        }
+        catch (err) {
+            this.reset();
+            console.error(err.message);
+        }
+    };
+    /**
      * sql元验证
      */
     Table.prototype.sqlUnitVerifier = function () {
@@ -229,6 +245,10 @@ var Table = /** @class */ (function () {
         }
         return expression;
     };
+    /**
+     * 验证加处理BETWEEN的参数
+     * @param value
+     */
     Table.prototype.generateConditionExpressionBeteen = function (value) {
         var params = value.split(',');
         if (params.length !== 2) {

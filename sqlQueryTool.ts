@@ -191,7 +191,21 @@ class Table {
             console.error('update expect at least one parameter')
         }
     }
-
+    /**
+     * 生成删除语句
+     */
+    public delete(): string {
+        try {
+            //验证下必要信息
+            this.sqlUnitVerifier()
+            let sqlArr = ['DELETE FROM', this.tableName, 'WHERE', this.condition]
+            this.reset()
+            return sqlArr.join(this.blankSpace)
+        } catch (err) {
+            this.reset()
+            console.error(err.message)
+        }
+    }
     /**
      * sql元验证
      */
@@ -254,6 +268,10 @@ class Table {
         }
         return expression
     }
+    /**
+     * 验证加处理BETWEEN的参数
+     * @param value
+     */
     private generateConditionExpressionBeteen(value: string): string {
         let params = value.split(',')
         if (params.length !== 2) {
