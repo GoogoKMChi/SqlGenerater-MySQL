@@ -1,6 +1,6 @@
 # SqlGenerater-MySQL
 一个nodejs的MySQL的sql语句生成器，链式操作，根据自己的习惯刚开始写，持续维护ing
-## 用法
+## select用法
 <pre><code>
 let table = new Table() // new 一个对象即可，重复使用
 table.table('tableName').where({
@@ -26,3 +26,25 @@ WHERE (
 	  ) OR (`field8` = '321')
 </code></pre>
 
+## insert 用法
+<pre><code>
+insert(object,full?)
+===========================
+test.table('user').insert({
+    name: 'kmc',
+    age: '18',
+    account:'googokmchi'
+})
+
+会生成
+INSERT INTO `user` (`name`,`age`,`account`) VALUES (?,?,?)
+===========================
+test.table('user').insert({
+    name: 'cmk',
+    age: '81',
+    account: 'ihcmkogoog'
+}, true)
+
+会生成
+INSERT INTO `user` (`name`,`age`,`account`) VALUES ('kmc','18','googokmchi')
+</code></pre>

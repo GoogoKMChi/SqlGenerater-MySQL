@@ -136,6 +136,33 @@ class Table {
     }
 
     /**
+     * 生成insert语句
+     * @param data 只能是对象
+     * @param full 可选，默认false，生成values(?,?,?)的形式
+     */
+    public insert(data: object, full = false): string {
+        try {
+            //验证下必要信息
+            this.sqlUnitVerifier()
+            let key = []
+            let value = []
+            let noValue = []
+            for (let i in data) {
+                key.push('`' + i + '`')
+                value.push('\'' + data[i] + '\'')
+                noValue.push('?')
+            }
+            let values = full ? value : noValue
+            let sqlArr = ['INSERT INTO', this.tableName, '(' + key.join(',') + ')', 'VALUES', '(' + values.join(',') + ')']
+            this.reset()
+            return sqlArr.join(this.blankSpace)
+        } catch (err) {
+            this.reset()
+            console.error(err.message)
+        }
+    }
+
+    /**
      * sql元验证
      */
     private sqlUnitVerifier(): void {
@@ -214,3 +241,13 @@ let test = new Table()
 test.table('123').where({
     a: 3, b: '2', c: ['3', 'not in'], d: ['3,6,9', 'in'], e: ['ac', 'like']
 }).select()
+test.table('user').insert({
+    name: 'kmc',
+    age: '18',
+    account:'googokmchi'
+})
+test.table('user').insert({
+    name: 'cmk',
+    age: '81',
+    account: 'ihcmkogoog'
+}, true)
