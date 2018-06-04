@@ -293,4 +293,3 @@ test.table('updated').where({
     name: 'whatever',
     sex: 'who knows'
 });
-//# sourceMappingURL=sqlQueryTool.js.map

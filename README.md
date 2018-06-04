@@ -1,5 +1,20 @@
 # SqlGenerater-MySQL
 一个nodejs的MySQL的sql语句生成器，链式操作，根据自己的习惯刚开始写，持续维护ing
+
+## where和whereor
+<pre><code>
+test.table('bb').whereor({a:1,b:2}).select()
+"SELECT * FROM `bb` WHERE `a` = '1' OR `b` = '2'"
+
+test.table('bb').where({c:2,d:4}).whereor({a:1,b:2}).select()
+"SELECT * FROM `bb` WHERE `c` = '2' AND `d` = '4'(`a` = '1' OR `b` = '2')"
+
+test.table('bb').where({c:2,d:4}).or().whereor({a:1,b:2}).select()
+"SELECT * FROM `bb` WHERE (`c` = '2' AND `d` = '4')  OR (`a` = '1' OR `b` = '2')"
+
+test.table('bb').where({c:2,d:4}).and().whereor({a:1,b:2}).select()
+"SELECT * FROM `bb` WHERE (`c` = '2' AND `d` = '4')  AND (`a` = '1' OR `b` = '2')"
+</code></pre>
 ## select用法
 <pre><code>
 let table = new Table() // new 一个对象即可，重复使用
