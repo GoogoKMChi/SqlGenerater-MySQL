@@ -14,6 +14,9 @@ test.table('bb').where({c:2,d:4}).or().whereor({a:1,b:2}).select()
 
 test.table('bb').where({c:2,d:4}).and().whereor({a:1,b:2}).select()
 "SELECT * FROM `bb` WHERE (`c` = '2' AND `d` = '4')  AND (`a` = '1' OR `b` = '2')"
+
+test.table('123').where('a,b notin,c between,d,e,f like').select();
+"SELECT * FROM `123` WHERE `a` = '?' AND `b` NOT IN ('?') AND `c` BETWEEN '?' AND '?' AND `d` = '?' AND `e` = '?' AND `f` LIKE '%?%'"
 </code></pre>
 ## select用法
 <pre><code>

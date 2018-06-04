@@ -34,27 +34,27 @@ class Table {
      * 生成且链接的语句
      * @param condition
      */
-    public where(condition: string): Table
-    public where(condition: object): Table
-    public where(condition: any): Table {
-        return this.whereBuilder(condition, 'AND')
+    public where(condition: string, full?: boolean): Table
+    public where(condition: object, full?: boolean): Table
+    public where(condition: any, full: boolean): Table {
+        return this.whereBuilder(condition, 'AND', full)
     }
     /**
      * where OR
      * 生成或链接的语句
      * @param condition
      */
-    public whereor(condition: string): Table
-    public whereor(condition: object): Table
-    public whereor(condition: any): Table {
-        return this.whereBuilder(condition, 'OR')
+    public whereor(condition: string, full?: boolean): Table
+    public whereor(condition: object, full?: boolean): Table
+    public whereor(condition: any, full?: boolean): Table {
+        return this.whereBuilder(condition, 'OR', full)
     }
     /**
      * where 构造器
      * @param condition 要处理的条件，string或object，如果是string则直接返回，如果是object则进行处理
      * @param method 可选参数,condition处理时的关系，为AND或OR，默认为AND
      */
-    private whereBuilder(condition: any, method = 'AND'): Table {
+    private whereBuilder(condition: any, method = 'AND', full = false): Table {
         this._andorValid = true
         // 级联设置where的话后新加入的条件整体用（）独立包围
         let alreadySet = false
@@ -63,17 +63,45 @@ class Table {
             alreadySet = true
         }
         if (typeof condition === 'string') {
-            // 传入sql字符串的话直接设置condition
-            this.condition += condition
-        } else if (typeof condition === 'object') {
+            if (full) {
+                // 传入sql字符串的话直接设置condition
+                this.condition += condition
+                this.condition += alreadySet ? ')' : ''
+                return this
+            } else {
+                // 对传入的字符串进行切割并处理
+                let tmpConditionArr = []
+                let transCondition = {}
+                tmpConditionArr = condition.split(',')
+                tmpConditionArr.forEach(item => {
+                    let combin = item.split(' ')
+                    if (combin.length === 1) {
+                        transCondition[combin[0]] = ['=']
+                    } else {
+                        transCondition[combin[0]] = [combin[1]]
+                    }
+                })
+                condition = transCondition
+            }
+        }
+        if (typeof condition === 'object') {
             // 将数组中的条件拼接起来
             let concatenation = []
             for (let unit in condition) {
                 if (typeof condition[unit] !== 'object') {
-                    concatenation.push('`' + unit + '` =' + this.blankSpace + '\'' + condition[unit] + '\'')
-                } else if (typeof condition[unit] === 'object') {
+                    concatenation.push('`' + unit + '` =' + this.blankSpace + '\'' + (full ? condition[unit] : '?') + '\'')
+                } else if (Array.isArray(condition[unit])) {
                     try {
-                        let expression = this.generateConditionExpression(condition[unit][0], condition[unit][1])
+                        let value = ''
+                        let type = ''
+                        if (condition[unit].length === 1) {
+                            value = '?'
+                            type = condition[unit][0]
+                        } else if (condition[unit].length === 2){
+                            value = condition[unit][0]
+                            type = condition[unit][1]
+                        }
+                        let expression = this.generateConditionExpression(value, type)
                         concatenation.push('`' + unit + '`' + this.blankSpace + expression)
                     } catch (err) {
                         console.error(err.message)
@@ -285,7 +313,8 @@ class Table {
     private generateConditionExpressionBeteen(value: string): string {
         let params = value.split(',')
         if (params.length !== 2) {
-            throw new Error('between param not valid.like \'1,2\'')
+            //throw new Error('between param not valid.like \'1,2\'')
+            return '\'?\' AND \'?\''
         }
         return '\'' + params[0] + '\' AND \'' + params[1] + '\''
     }
@@ -315,4 +344,10 @@ test.table('updated').where({
 }).update({
     name: 'whatever',
     sex: 'who knows'
-})
+    })
+test.table('123').where({
+    a: 3, b: '2', c: ['not in'], d: ['3,6,9', 'in'], e: ['ac', 'like']
+}).select()
+test.table('123').where({
+    a: 3, b: '2', c: ['not in'], d: ['3,6,9', 'in'], e: ['ac', 'like']
+},true).select()

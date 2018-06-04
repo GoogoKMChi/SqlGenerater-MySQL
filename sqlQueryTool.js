@@ -12,19 +12,20 @@ var Table = /** @class */ (function () {
         this.tableName = '`' + tableName + '`';
         return this;
     };
-    Table.prototype.where = function (condition) {
-        return this.whereBuilder(condition, 'AND');
+    Table.prototype.where = function (condition, full) {
+        return this.whereBuilder(condition, 'AND', full);
     };
-    Table.prototype.whereor = function (condition) {
-        return this.whereBuilder(condition, 'OR');
+    Table.prototype.whereor = function (condition, full) {
+        return this.whereBuilder(condition, 'OR', full);
     };
     /**
      * where 构造器
      * @param condition 要处理的条件，string或object，如果是string则直接返回，如果是object则进行处理
      * @param method 可选参数,condition处理时的关系，为AND或OR，默认为AND
      */
-    Table.prototype.whereBuilder = function (condition, method) {
+    Table.prototype.whereBuilder = function (condition, method, full) {
         if (method === void 0) { method = 'AND'; }
+        if (full === void 0) { full = false; }
         this._andorValid = true;
         // 级联设置where的话后新加入的条件整体用（）独立包围
         var alreadySet = false;
@@ -33,19 +34,49 @@ var Table = /** @class */ (function () {
             alreadySet = true;
         }
         if (typeof condition === 'string') {
-            // 传入sql字符串的话直接设置condition
-            this.condition += condition;
+            if (full) {
+                // 传入sql字符串的话直接设置condition
+                this.condition += condition;
+                this.condition += alreadySet ? ')' : '';
+                return this;
+            }
+            else {
+                // 对传入的字符串进行切割并处理
+                var tmpConditionArr = [];
+                var transCondition_1 = {};
+                tmpConditionArr = condition.split(',');
+                tmpConditionArr.forEach(function (item) {
+                    var combin = item.split(' ');
+                    if (combin.length === 1) {
+                        transCondition_1[combin[0]] = ['='];
+                    }
+                    else {
+                        transCondition_1[combin[0]] = [combin[1]];
+                    }
+                });
+                condition = transCondition_1;
+            }
         }
-        else if (typeof condition === 'object') {
+        if (typeof condition === 'object') {
             // 将数组中的条件拼接起来
             var concatenation = [];
             for (var unit in condition) {
                 if (typeof condition[unit] !== 'object') {
-                    concatenation.push('`' + unit + '` =' + this.blankSpace + '\'' + condition[unit] + '\'');
+                    concatenation.push('`' + unit + '` =' + this.blankSpace + '\'' + (full ? condition[unit] : '?') + '\'');
                 }
-                else if (typeof condition[unit] === 'object') {
+                else if (Array.isArray(condition[unit])) {
                     try {
-                        var expression = this.generateConditionExpression(condition[unit][0], condition[unit][1]);
+                        var value = '';
+                        var type = '';
+                        if (condition[unit].length === 1) {
+                            value = '?';
+                            type = condition[unit][0];
+                        }
+                        else if (condition[unit].length === 2) {
+                            value = condition[unit][0];
+                            type = condition[unit][1];
+                        }
+                        var expression = this.generateConditionExpression(value, type);
                         concatenation.push('`' + unit + '`' + this.blankSpace + expression);
                     }
                     catch (err) {
@@ -262,7 +293,8 @@ var Table = /** @class */ (function () {
     Table.prototype.generateConditionExpressionBeteen = function (value) {
         var params = value.split(',');
         if (params.length !== 2) {
-            throw new Error('between param not valid.like \'1,2\'');
+            //throw new Error('between param not valid.like \'1,2\'')
+            return '\'?\' AND \'?\'';
         }
         return '\'' + params[0] + '\' AND \'' + params[1] + '\'';
     };
@@ -293,3 +325,10 @@ test.table('updated').where({
     name: 'whatever',
     sex: 'who knows'
 });
+test.table('123').where({
+    a: 3, b: '2', c: ['not in'], d: ['3,6,9', 'in'], e: ['ac', 'like']
+}).select();
+test.table('123').where({
+    a: 3, b: '2', c: ['not in'], d: ['3,6,9', 'in'], e: ['ac', 'like']
+}, true).select();
+//# sourceMappingURL=sqlQueryTool.js.map
