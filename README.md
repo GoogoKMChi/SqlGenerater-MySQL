@@ -28,8 +28,9 @@ WHERE (
 
 ## insert 用法
 <pre><code>
-insert(object,full?)
+insert(object|Array<string>)
 ===========================
+
 test.table('user').insert({
     name: 'kmc',
     age: '18',
@@ -37,16 +38,21 @@ test.table('user').insert({
 })
 
 会生成
-INSERT INTO `user` (`name`,`age`,`account`) VALUES (?,?,?)
+INSERT INTO `user` (`name`,`age`,`account`) VALUES ('kmc','18','googokmchi')
+
 ===========================
-test.table('user').insert({
-    name: 'cmk',
-    age: '81',
-    account: 'ihcmkogoog'
-}, true)
+
+test.table('user').insert(['name','age','account])
 
 会生成
-INSERT INTO `user` (`name`,`age`,`account`) VALUES ('kmc','18','googokmchi')
+INSERT INTO `user` (`name`,`age`,`account`) VALUES (?,?,?)
+
+===========================
+
+test.table('user').insert('name sex account')
+
+会生成
+INSERT INTO `user` (name,sex,account) VALUES (?,?,?)
 </code></pre>
 
 ## update用法
@@ -60,6 +66,28 @@ test.table('updated').where({
 
 会生成
 UPDATE `updated` 
+SET `name`='whatever',`sex`='who knows' 
+WHERE `number` BETWEEN '1' AND '4'
+
+===========================
+
+test.table('updated').where({
+    number: ['1,4', 'between']
+}).update(['name,'sex'])
+
+会生成
+UPDATE `updated` 
 SET `name`=?,`sex`=? 
+WHERE `number` BETWEEN '1' AND '4'
+
+===========================
+
+test.table('updated').where({
+    number: ['1,4', 'between']
+}).update('name value state'); // 或'name,value,state'
+
+会生成
+UPDATE `updated` 
+SET `name`=?,`value`=?,`states`=? 
 WHERE `number` BETWEEN '1' AND '4'
 </code></pre>

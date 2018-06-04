@@ -108,21 +108,25 @@ var Table = /** @class */ (function () {
     };
     /**
      * 生成insert语句
-     * @param data 只能是对象
-     * @param full 可选，默认false，生成values(?,?,?)的形式
+     * @param data object或Array，传入object返回value（value1，value2），Array返回value(?,?,?)
      */
-    Table.prototype.insert = function (data, full) {
-        if (full === void 0) { full = false; }
+    Table.prototype.insert = function (data) {
         if (data) {
             try {
                 //验证下必要信息
                 this.sqlUnitVerifier();
+                if (typeof data === 'string') {
+                    if (data.indexOf(',') !== -1)
+                        data = data.split(',');
+                    else
+                        data = data.split(' ');
+                }
                 var key = [];
                 var value = [];
-                var noValue = [];
+                var isArray = Array.isArray(data);
                 for (var i in data) {
-                    key.push('`' + i + '`');
-                    value.push(full ? ('\'' + data[i] + '\'') : '?');
+                    key.push('`' + isArray ? data[i] : i + '`');
+                    value.push(isArray ? '?' : ('\'' + data[i] + '\''));
                 }
                 var sqlArr = ['INSERT INTO', this.tableName, '(' + key.join(',') + ')', 'VALUES', '(' + value.join(',') + ')'];
                 this.reset();
@@ -143,15 +147,21 @@ var Table = /** @class */ (function () {
      * @param data
      * @param full 可选，默认false，生成`key`=?的形式
      */
-    Table.prototype.update = function (data, full) {
-        if (full === void 0) { full = false; }
+    Table.prototype.update = function (data) {
         if (data) {
             try {
                 //验证下必要信息
                 this.sqlUnitVerifier();
+                if (typeof data === 'string') {
+                    if (data.indexOf(',') !== -1)
+                        data = data.split(',');
+                    else
+                        data = data.split(' ');
+                }
                 var setValue = [];
+                var isArray = Array.isArray(data);
                 for (var i in data) {
-                    setValue.push('`' + i + '`=' + (full ? '\'' + data[i] + '\'' : '?'));
+                    setValue.push('`' + (isArray ? data[i] : i) + '`=' + (!isArray ? '\'' + data[i] + '\'' : '?'));
                 }
                 var sqlArr = ['UPDATE', this.tableName, 'SET', setValue.join(','), 'WHERE', this.condition];
                 this.reset();
@@ -275,7 +285,8 @@ test.table('user').insert({
     name: 'cmk',
     age: '81',
     account: 'ihcmkogoog'
-}, true);
+});
+test.table('user').insert(['name', 'age', 'account']);
 test.table('updated').where({
     number: ['1,4', 'between']
 }).update({

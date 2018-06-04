@@ -137,20 +137,24 @@ class Table {
 
     /**
      * 生成insert语句
-     * @param data 只能是对象
-     * @param full 可选，默认false，生成values(?,?,?)的形式
+     * @param data object或Array，传入object返回value（value1，value2），Array返回value(?,?,?)
      */
-    public insert(data: object, full = false): string {
+    public insert(data: object | Array<string> | string): string {
         if (data) {
             try {
                 //验证下必要信息
                 this.sqlUnitVerifier()
+                if (typeof data === 'string') {
+                    if (data.indexOf(',') !== -1)
+                        data = data.split(',')
+                    else data = data.split(' ')
+                }
                 let key = []
                 let value = []
-                let noValue = []
+                let isArray = Array.isArray(data)
                 for (let i in data) {
-                    key.push('`' + i + '`')
-                    value.push(full ? ('\'' + data[i] + '\'') : '?')
+                    key.push('`' + isArray ? data[i] : i + '`')
+                    value.push(isArray ? '?' : ('\'' + data[i] + '\''))
                 }
                 let sqlArr = ['INSERT INTO', this.tableName, '(' + key.join(',') + ')', 'VALUES', '(' + value.join(',') + ')']
                 this.reset()
@@ -170,14 +174,20 @@ class Table {
      * @param data
      * @param full 可选，默认false，生成`key`=?的形式
      */
-    public update(data: object, full = false): string {
+    public update(data: object | Array<string> | string): string {
         if (data) {
             try {
                 //验证下必要信息
                 this.sqlUnitVerifier()
+                if (typeof data === 'string') {
+                    if (data.indexOf(',') !== -1)
+                        data = data.split(',')
+                    else data = data.split(' ')
+                }
                 let setValue = []
+                let isArray = Array.isArray(data)
                 for (let i in data) {
-                    setValue.push('`' + i + '`=' + (full ? '\'' + data[i] + '\'' : '?'))
+                    setValue.push('`' + (isArray ? data[i] : i) + '`=' + (!isArray ? '\'' + data[i] + '\'' : '?'))
                 }
                 let sqlArr = ['UPDATE', this.tableName, 'SET', setValue.join(','), 'WHERE', this.condition]
                 this.reset()
@@ -298,7 +308,8 @@ test.table('user').insert({
     name: 'cmk',
     age: '81',
     account: 'ihcmkogoog'
-}, true)
+})
+test.table('user').insert(['name', 'age', 'account'])
 test.table('updated').where({
     number: ['1,4', 'between']
 }).update({
