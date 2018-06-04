@@ -13,9 +13,11 @@ class Table {
     private blankSpace: string
     // 保证使用and或or方法时where或whereor方法的合法性(保证链式中and和or方法不是最后一次调用)
     private _andorValid: boolean
+    // Join字符串
+    private joinSql: string
 
     constructor() {
-        this.fields = this.sqlString = this.tableName = this.condition = ''
+        this.fields = this.sqlString = this.tableName = this.condition = this.joinSql = ''
         this.blankSpace = ' '
         this._andorValid = true
     }
@@ -154,13 +156,22 @@ class Table {
             } else {
                 this.fields = '*'
             }
-            let sqlArr = ['SELECT', this.fields, 'FROM', this.tableName, 'WHERE', this.condition]
+            let sqlArr = ['SELECT', this.fields, 'FROM', this.tableName, this.joinSql, 'WHERE', this.condition]
             this.reset()
             return sqlArr.join(this.blankSpace)
         } catch (err) {
             this.reset()
             console.error(err.message)
         }
+    }
+
+    /**
+     * 简单加入join
+     * @param sql
+     */
+    public join(sql: string): Table {
+        this.joinSql = sql
+        return this
     }
 
     /**
@@ -320,7 +331,7 @@ class Table {
     }
     // 清空记录
     private reset(): void {
-        this.fields = this.sqlString = this.tableName = this.condition = ''
+        this.fields = this.sqlString = this.tableName = this.condition = this.joinSql = ''
     }
 }
 

@@ -1,6 +1,6 @@
 var Table = /** @class */ (function () {
     function Table() {
-        this.fields = this.sqlString = this.tableName = this.condition = '';
+        this.fields = this.sqlString = this.tableName = this.condition = this.joinSql = '';
         this.blankSpace = ' ';
         this._andorValid = true;
     }
@@ -128,7 +128,7 @@ var Table = /** @class */ (function () {
             else {
                 this.fields = '*';
             }
-            var sqlArr = ['SELECT', this.fields, 'FROM', this.tableName, 'WHERE', this.condition];
+            var sqlArr = ['SELECT', this.fields, 'FROM', this.tableName, this.joinSql, 'WHERE', this.condition];
             this.reset();
             return sqlArr.join(this.blankSpace);
         }
@@ -136,6 +136,14 @@ var Table = /** @class */ (function () {
             this.reset();
             console.error(err.message);
         }
+    };
+    /**
+     * 简单加入join
+     * @param sql
+     */
+    Table.prototype.join = function (sql) {
+        this.joinSql = sql;
+        return this;
     };
     /**
      * 生成insert语句
@@ -300,7 +308,7 @@ var Table = /** @class */ (function () {
     };
     // 清空记录
     Table.prototype.reset = function () {
-        this.fields = this.sqlString = this.tableName = this.condition = '';
+        this.fields = this.sqlString = this.tableName = this.condition = this.joinSql = '';
     };
     return Table;
 }());

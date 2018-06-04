@@ -111,4 +111,16 @@ test.table('updated').where({
 UPDATE `updated` 
 SET `name`=?,`value`=?,`states`=? 
 WHERE `number` BETWEEN '1' AND '4'
+
+##Join
+test.table('aa')
+.join('INNER JOIN t_type ON t_blog.typeId=t_type.id')
+.where('t_blog.a !=,b >,c,t_type.d like')
+.select();
+
+会生成
+"SELECT * 
+FROM `aa` 
+INNER JOIN t_type ON t_blog.typeId=t_type.id //是的怎么输进去的怎么出来了...
+WHERE `t_blog.a` != '?' AND `b` > '?' AND `c` = '?' AND `t_type.d` LIKE '%?%'"
 </code></pre>
