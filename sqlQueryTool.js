@@ -3,6 +3,7 @@ var Table = /** @class */ (function () {
         this.fields = this.sqlString = this.tableName = this.condition = this.joinSql = '';
         this.blankSpace = ' ';
         this._andorValid = true;
+        return this;
     }
     /**
      * 设置表名

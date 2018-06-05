@@ -16,7 +16,7 @@ class Table {
     // Join×Ö·û´®
     private joinSql: string
 
-    constructor() {
+    constructor(){
         this.fields = this.sqlString = this.tableName = this.condition = this.joinSql = ''
         this.blankSpace = ' '
         this._andorValid = true
